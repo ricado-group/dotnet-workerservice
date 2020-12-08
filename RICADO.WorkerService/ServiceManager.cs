@@ -33,6 +33,9 @@ namespace RICADO.WorkerService
 
         #region Public Properties
 
+        /// <summary>
+        /// Whether the Service Manager has been Initialized
+        /// </summary>
         public static bool IsInitialized
         {
             get
@@ -51,6 +54,9 @@ namespace RICADO.WorkerService
             }
         }
 
+        /// <summary>
+        /// A Global Flag used to Signal the Application Shutdown is in progress
+        /// </summary>
         public static bool Shutdown
         {
             get
@@ -69,6 +75,9 @@ namespace RICADO.WorkerService
             }
         }
 
+        /// <summary>
+        /// The Name of the Running Application
+        /// </summary>
         public static string AppName
         {
             get
@@ -82,6 +91,9 @@ namespace RICADO.WorkerService
             }
         }
 
+        /// <summary>
+        /// The Version of the Running Application
+        /// </summary>
         public static Version AppVersion
         {
             get
@@ -100,6 +112,10 @@ namespace RICADO.WorkerService
 
         #region Public Methods
 
+        /// <summary>
+        /// Initialize the Service (Host) Manager. This should be called at the very start of your Entry Point <c>Main</c> Method
+        /// </summary>
+        /// <param name="args">The <c>Main</c> Method Startup Arguments</param>
         public static void Initialize(string[] args)
         {
             lock (_initializedLock)
@@ -116,11 +132,16 @@ namespace RICADO.WorkerService
             }
         }
 
+        /// <summary>
+        /// Adds a Hosted Service to be Started and Stopped by the Service (Host) Manager
+        /// </summary>
+        /// <typeparam name="TService">The Service Class</typeparam>
+        /// <exception cref="System.InvalidOperationException">Thrown when AddService is called before Initialize</exception>
         public static void AddService<TService>() where TService : class, IHostedService
         {
             if(IsInitialized == false)
             {
-                throw new Exception("Initialize hasn't been called!"); // TODO: Improve this Exception
+                throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Add a Service");
             }
 
             lock(_hostBuilderLock)
@@ -129,18 +150,22 @@ namespace RICADO.WorkerService
             }
         }
 
+        /// <summary>
+        /// Runs the Service Host and Blocks the Calling Thread until a SIGTERM or Ctrl+C is received
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Thrown when Run is called before Initialize or when Run is called multiple times within a Service's Lifetime</exception>
         public static void Run()
         {
             if(IsInitialized == false)
             {
-                throw new Exception("Initialize hasn't been called!"); // TODO: Improve this Exception
+                throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Run");
             }
 
             lock(_hostLock)
             {
                 if(_host != null)
                 {
-                    throw new Exception("Run can only be called once!"); // TODO: Improve this Exception
+                    throw new InvalidOperationException("The *Run* Method can only be called once within a Service's Lifetime");
                 }
             }
 
@@ -193,6 +218,11 @@ namespace RICADO.WorkerService
 
         #region Private Methods
 
+        /// <summary>
+        /// Creates a Host Builder to Run Services for an Application
+        /// </summary>
+        /// <param name="args">The <c>Main</c> Method Startup Arguments</param>
+        /// <returns>A Host Builder ready to call <c>.Build()</c></returns>
         private static IHostBuilder createHostBuilder(string[] args)
         {
             IHostBuilder builder = Host.CreateDefaultBuilder(args);
