@@ -70,7 +70,7 @@ namespace RICADO.WorkerService
             }
             catch (Exception e)
             {
-                Logger.LogCritical(e);
+                Logger.LogCritical(e, "Unexpected Exception during Background Service Start Async");
             }
 
             await base.StartAsync(cancellationToken);
@@ -87,7 +87,7 @@ namespace RICADO.WorkerService
             }
             catch (Exception e)
             {
-                Logger.LogCritical(e);
+                Logger.LogCritical(e, "Unexpected Exception during Background Service Stop Async");
             }
         }
 
@@ -99,7 +99,7 @@ namespace RICADO.WorkerService
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (stoppingToken.IsCancellationRequested == false && ServiceManager.Shutdown == false)
+            while (stoppingToken.IsCancellationRequested == false)
             {
                 try
                 {
@@ -107,7 +107,7 @@ namespace RICADO.WorkerService
                 }
                 catch (Exception e)
                 {
-                    Logger.LogCritical(e);
+                    Logger.LogCritical(e, "Unexpected Exception in Background Server Execute Async Method");
                 }
                 finally
                 {

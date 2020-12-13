@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using RICADO.Logging;
+using RICADO.Configuration;
 
 namespace RICADO.WorkerService
 {
@@ -9,6 +13,9 @@ namespace RICADO.WorkerService
     {
         #region Private Properties
 
+        private readonly IHostEnvironment _hostEnvironment;
+        private readonly IConfigurationRoot _configuration;
+        private readonly Version _version;
 
         #endregion
 
@@ -21,8 +28,13 @@ namespace RICADO.WorkerService
 
         #region Constructor
 
-        public InternalWorker()
+        public InternalWorker(IHostEnvironment hostEnvironment, IConfiguration configuration)
         {
+            _hostEnvironment = hostEnvironment;
+
+            _configuration = (IConfigurationRoot)configuration;
+
+            _version = Assembly.GetEntryAssembly().GetName().Version;
         }
 
         #endregion
@@ -33,29 +45,39 @@ namespace RICADO.WorkerService
         /// <inheritdoc/>
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            Logger.LogInformation("Starting " + ServiceManager.AppName);
+            LogManager.Initialize(_configuration.GetSection("Logging").GetValue<string>("Level", "Information"), _hostEnvironment.EnvironmentName, _hostEnvironment.ContentRootPath);
 
-            await Task.Delay(1500, cancellationToken); // TODO: Perform Start Tasks
+            configureBugsnag();
+
+            Logger.LogInformation("Starting {name}", _hostEnvironment.ApplicationName);
+
+            Logger.LogInformation("Environment: {env}", _hostEnvironment.EnvironmentName);
+
+            Logger.LogInformation("Version: {version}", _version.ToString(3));
+
+            RICADO.Configuration.ConfigurationProvider.Initialize(_configuration);
+
+            // TODO: Perform Start Tasks
 
             await base.StartAsync(cancellationToken);
 
-            Logger.LogInformation(ServiceManager.AppName + " " + ServiceManager.AppVersion.ToString(3));
-
-            Logger.LogInformation(ServiceManager.AppName + " Started");
+            Logger.LogInformation("{name} Started", _hostEnvironment.ApplicationName);
         }
 
         /// <inheritdoc/>
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            ServiceManager.Shutdown = true;
-
-            Logger.LogInformation("Stopping " + ServiceManager.AppName);
+            Logger.LogInformation("Stopping {name}", _hostEnvironment.ApplicationName);
 
             await base.StopAsync(cancellationToken);
 
-            await Task.Delay(1500, cancellationToken); // TODO: Perform Stop Tasks
+            // TODO: Perform Stop Tasks
 
-            Logger.LogInformation(ServiceManager.AppName + " Stopped");
+            RICADO.Configuration.ConfigurationProvider.Destroy();
+
+            Logger.LogInformation("{name} Stopped", _hostEnvironment.ApplicationName);
+
+            LogManager.Destroy();
         }
 
         #endregion
@@ -66,11 +88,11 @@ namespace RICADO.WorkerService
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while(stoppingToken.IsCancellationRequested == false && ServiceManager.Shutdown == false)
+            while(stoppingToken.IsCancellationRequested == false)
             {
                 try
                 {
-                    await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(15000, stoppingToken);
                 }
                 catch
                 {
@@ -83,6 +105,22 @@ namespace RICADO.WorkerService
 
         #region Private Methods
 
+        private void configureBugsnag()
+        {
+            try
+            {
+                string apiKey;
+
+                if (RICADO.Configuration.ConfigurationProvider.TrySelectValue<string>("Bugsnag.APIKey", null, out apiKey))
+                {
+                    LogManager.ConfigureBugsnag(apiKey);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Unexpected Exception during Bugsnag Configuration");
+            }
+        }
 
         #endregion
     }
