@@ -47,8 +47,6 @@ namespace RICADO.WorkerService
         {
             LogManager.Initialize(_configuration.GetSection("Logging").GetValue<string>("Level", "Information"), _hostEnvironment.EnvironmentName, _hostEnvironment.ContentRootPath);
 
-            configureBugsnag();
-
             Logger.LogInformation("Starting {name}", _hostEnvironment.ApplicationName);
 
             Logger.LogInformation("Environment: {env}", _hostEnvironment.EnvironmentName);
@@ -57,7 +55,7 @@ namespace RICADO.WorkerService
 
             RICADO.Configuration.ConfigurationProvider.Initialize(_configuration);
 
-            // TODO: Perform Start Tasks
+            configureBugsnag();
 
             await base.StartAsync(cancellationToken);
 
@@ -70,8 +68,6 @@ namespace RICADO.WorkerService
             Logger.LogInformation("Stopping {name}", _hostEnvironment.ApplicationName);
 
             await base.StopAsync(cancellationToken);
-
-            // TODO: Perform Stop Tasks
 
             RICADO.Configuration.ConfigurationProvider.Destroy();
 
