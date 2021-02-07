@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using RICADO.Logging;
-using RICADO.Configuration;
 
 namespace RICADO.WorkerService
 {
@@ -16,12 +15,6 @@ namespace RICADO.WorkerService
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IConfigurationRoot _configuration;
         private readonly Version _version;
-
-        #endregion
-
-
-        #region Public Properties
-
 
         #endregion
 
@@ -53,7 +46,7 @@ namespace RICADO.WorkerService
 
             Logger.LogInformation("Version: {version}", _version.ToString(3));
 
-            RICADO.Configuration.ConfigurationProvider.Initialize(_configuration);
+            Configuration.ConfigurationProvider.Initialize(_configuration);
 
             configureBugsnag();
 
@@ -69,7 +62,7 @@ namespace RICADO.WorkerService
 
             await base.StopAsync(cancellationToken);
 
-            RICADO.Configuration.ConfigurationProvider.Destroy();
+            Configuration.ConfigurationProvider.Destroy();
 
             Logger.LogInformation("{name} Stopped", _hostEnvironment.ApplicationName);
 
@@ -88,7 +81,7 @@ namespace RICADO.WorkerService
             {
                 try
                 {
-                    await Task.Delay(15000, stoppingToken);
+                    await Task.Delay(Timeout.Infinite, stoppingToken);
                 }
                 catch
                 {
@@ -101,13 +94,11 @@ namespace RICADO.WorkerService
 
         #region Private Methods
 
-        private void configureBugsnag()
+        private static void configureBugsnag()
         {
             try
             {
-                string apiKey;
-
-                if (RICADO.Configuration.ConfigurationProvider.TrySelectValue<string>("Bugsnag.APIKey", null, out apiKey))
+                if (Configuration.ConfigurationProvider.TrySelectValue("Bugsnag.APIKey", null, out string apiKey))
                 {
                     LogManager.ConfigureBugsnag(apiKey);
                 }

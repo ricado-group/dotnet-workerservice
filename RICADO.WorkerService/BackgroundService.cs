@@ -13,12 +13,11 @@ namespace RICADO.WorkerService
         #region Private Properties
 
         private int _minimumDelayBetweenRunCalls = 50;
-        private object _minimumDelayBetweenCallsLock = new object();
 
         #endregion
 
 
-        #region Public Properties
+        #region Protected Properties
 
         /// <summary>
         /// The Delay in Milliseconds Between consecutive Calls to the <c>Run()</c> Method
@@ -26,21 +25,15 @@ namespace RICADO.WorkerService
         /// <remarks>
         /// Defaults to 50ms
         /// </remarks>
-        public int MinimumDelayBetweenRunCalls
+        protected int MinimumDelayBetweenRunCalls
         {
             get
             {
-                lock(_minimumDelayBetweenCallsLock)
-                {
-                    return _minimumDelayBetweenRunCalls;
-                }
+                return _minimumDelayBetweenRunCalls;
             }
             set
             {
-                lock(_minimumDelayBetweenCallsLock)
-                {
-                    _minimumDelayBetweenRunCalls = value;
-                }
+                _minimumDelayBetweenRunCalls = value;
             }
         }
 
@@ -68,6 +61,9 @@ namespace RICADO.WorkerService
             {
                 await Start(cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception e)
             {
                 Logger.LogCritical(e, "Unexpected Exception during Background Service Start Async");
@@ -84,6 +80,9 @@ namespace RICADO.WorkerService
             try
             {
                 await Stop(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception e)
             {

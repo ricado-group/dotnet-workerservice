@@ -70,10 +70,9 @@ namespace RICADO.WorkerService
                 throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Run");
             }
 
-            using (IHost host = _hostBuilder.Build())
-            {
-                host.Run();
-            }
+            using IHost host = _hostBuilder.Build();
+
+            host.Run();
         }
 
         #endregion
