@@ -63,10 +63,15 @@ namespace RICADO.WorkerService
             }
             catch (OperationCanceledException)
             {
+                if(cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
             }
             catch (Exception e)
             {
                 Logger.LogCritical(e, "Unexpected Exception during Background Service Start Async");
+                throw;
             }
 
             await base.StartAsync(cancellationToken);
@@ -83,6 +88,10 @@ namespace RICADO.WorkerService
             }
             catch (OperationCanceledException)
             {
+                if(cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
             }
             catch (Exception e)
             {
