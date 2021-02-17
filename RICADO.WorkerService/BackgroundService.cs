@@ -113,6 +113,13 @@ namespace RICADO.WorkerService
                 {
                     await Run(stoppingToken);
                 }
+                catch (OperationCanceledException)
+                {
+                    if(stoppingToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                }
                 catch (Exception e)
                 {
                     Logger.LogCritical(e, "Unexpected Exception in Background Server Execute Async Method");
@@ -122,6 +129,13 @@ namespace RICADO.WorkerService
                     try
                     {
                         await Task.Delay(MinimumDelayBetweenRunCalls, stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        if(stoppingToken.IsCancellationRequested)
+                        {
+                            throw;
+                        }
                     }
                     catch
                     {
