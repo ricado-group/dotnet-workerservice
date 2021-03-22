@@ -5,10 +5,13 @@
     <Authors>RICADO Group</Authors>
     <Company>RICADO Group LP</Company>
     <Description>A Worker Service Manager for .NET 5 Applications</Description>
-    <Copyright>Copyright © RICADO Group LP 2009 - 2020</Copyright>
+    <Copyright>Copyright © RICADO Group LP 2009 - 2021</Copyright>
     <RepositoryUrl>https://github.com/ricado-group/dotnet-workerservice</RepositoryUrl>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,8 +27,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="RICADO.Configuration" Version="1.0.1" />
-    <PackageReference Include="RICADO.Logging" Version="1.0.6" />
+    <PackageReference Include="RICADO.Configuration" Version="1.0.3" />
+    <PackageReference Include="RICADO.Logging" Version="1.0.7" />
   </ItemGroup>
 
 </Project>
