@@ -72,7 +72,13 @@ namespace RICADO.WorkerService
 
             using IHost host = _hostBuilder.Build();
 
-            host.Run();
+            try
+            {
+                host.Run();
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
         #endregion
