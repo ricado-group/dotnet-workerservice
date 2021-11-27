@@ -27,8 +27,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-    <PackageReference Include="RICADO.Configuration" Version="1.0.3" />
-    <PackageReference Include="RICADO.Logging" Version="1.0.7" />
+    <PackageReference Include="RICADO.Configuration" Version="1.0.4" />
+    <PackageReference Include="RICADO.Logging" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
