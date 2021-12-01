@@ -12,6 +12,8 @@ namespace RICADO.WorkerService
     {
         #region Private Properties
 
+        private PeriodicTimer _timer;
+        
         private int _minimumDelayBetweenRunCalls = 50;
 
         #endregion
@@ -47,6 +49,7 @@ namespace RICADO.WorkerService
         /// </summary>
         public BackgroundService()
         {
+            _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_minimumDelayBetweenRunCalls));
         }
 
         #endregion
@@ -57,6 +60,8 @@ namespace RICADO.WorkerService
         /// <inheritdoc/>
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
+            _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_minimumDelayBetweenRunCalls));
+            
             try
             {
                 await Start(cancellationToken);
@@ -124,22 +129,20 @@ namespace RICADO.WorkerService
                 {
                     Logger.LogCritical(e, "Unexpected Exception in Background Server Execute Async Method");
                 }
-                finally
+
+                try
                 {
-                    try
+                    await _timer.WaitForNextTickAsync(stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    if (stoppingToken.IsCancellationRequested)
                     {
-                        await Task.Delay(MinimumDelayBetweenRunCalls, stoppingToken);
+                        throw;
                     }
-                    catch (OperationCanceledException)
-                    {
-                        if(stoppingToken.IsCancellationRequested)
-                        {
-                            throw;
-                        }
-                    }
-                    catch
-                    {
-                    }
+                }
+                catch
+                {
                 }
             }
         }
