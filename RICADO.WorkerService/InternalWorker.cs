@@ -27,7 +27,7 @@ namespace RICADO.WorkerService
 
             _configuration = (IConfigurationRoot)configuration;
 
-            _version = Assembly.GetEntryAssembly().GetName().Version;
+            _version = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0,0,0);
         }
 
         #endregion
@@ -98,7 +98,7 @@ namespace RICADO.WorkerService
         {
             try
             {
-                if (Configuration.ConfigurationProvider.TrySelectValue("Bugsnag.APIKey", null, out string apiKey))
+                if (Configuration.ConfigurationProvider.TrySelectValue("Bugsnag.APIKey", null, out string? apiKey))
                 {
                     LogManager.ConfigureBugsnag(apiKey);
                 }

@@ -14,9 +14,7 @@ namespace RICADO.WorkerService
     {
         #region Private Properties
 
-        private static bool _initialized = false;
-
-        private static IHostBuilder _hostBuilder;
+        private static IHostBuilder? _hostBuilder;
 
         #endregion
 
@@ -34,14 +32,12 @@ namespace RICADO.WorkerService
         /// <param name="args">The <c>Main</c> Method Startup Arguments</param>
         public static void Initialize(string[] args)
         {
-            if(_initialized == true)
+            if(_hostBuilder != null)
             {
                 return;
             }
 
             _hostBuilder = createHostBuilder(args);
-
-            _initialized = true;
         }
 
         /// <summary>
@@ -51,7 +47,7 @@ namespace RICADO.WorkerService
         /// <exception cref="System.InvalidOperationException">Thrown when AddService is called before Initialize</exception>
         public static void AddService<TService>() where TService : class, IHostedService
         {
-            if(_initialized == false)
+            if(_hostBuilder == null)
             {
                 throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Add a Service");
             }
@@ -65,7 +61,7 @@ namespace RICADO.WorkerService
         /// <exception cref="System.InvalidOperationException">Thrown when Run is called before Initialize or when Run is called multiple times within a Service's Lifetime</exception>
         public static void Run()
         {
-            if(_initialized == false)
+            if(_hostBuilder == null)
             {
                 throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Run");
             }
