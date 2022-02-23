@@ -1,7 +1,7 @@
-﻿using System;
+﻿using RICADO.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using RICADO.Logging;
 
 namespace RICADO.WorkerService
 {
@@ -12,8 +12,10 @@ namespace RICADO.WorkerService
     {
         #region Private Properties
 
+#if !NETSTANDARD
         private PeriodicTimer _timer;
-        
+#endif
+
         private int _minimumDelayBetweenRunCalls = 50;
 
         #endregion
@@ -49,7 +51,6 @@ namespace RICADO.WorkerService
         /// </summary>
         public BackgroundService()
         {
-            _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_minimumDelayBetweenRunCalls));
         }
 
         #endregion
@@ -60,8 +61,10 @@ namespace RICADO.WorkerService
         /// <inheritdoc/>
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
+#if !NETSTANDARD
             _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_minimumDelayBetweenRunCalls));
-            
+#endif
+
             try
             {
                 await Start(cancellationToken);
@@ -86,6 +89,10 @@ namespace RICADO.WorkerService
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             await base.StopAsync(cancellationToken);
+
+#if !NETSTANDARD
+            _timer?.Dispose();
+#endif
 
             try
             {
@@ -132,7 +139,11 @@ namespace RICADO.WorkerService
 
                 try
                 {
+#if NETSTANDARD
+                    await Task.Delay(_minimumDelayBetweenRunCalls, stoppingToken);
+#else
                     await _timer.WaitForNextTickAsync(stoppingToken);
+#endif
                 }
                 catch (OperationCanceledException)
                 {

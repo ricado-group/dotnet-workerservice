@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
-using RICADO.Logging;
 
 namespace RICADO.WorkerService
 {
@@ -14,7 +11,7 @@ namespace RICADO.WorkerService
     {
         #region Private Properties
 
-        private static IHostBuilder? _hostBuilder;
+        private static IHostBuilder _hostBuilder;
 
         #endregion
 
@@ -66,14 +63,15 @@ namespace RICADO.WorkerService
                 throw new InvalidOperationException("The *Initialize* Method must be called before attempting to Run");
             }
 
-            using IHost host = _hostBuilder.Build();
-
-            try
+            using (IHost host = _hostBuilder.Build())
             {
-                host.Run();
-            }
-            catch (OperationCanceledException)
-            {
+                try
+                {
+                    host.Run();
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
         }
 

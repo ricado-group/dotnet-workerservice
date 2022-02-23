@@ -98,7 +98,7 @@ namespace RICADO.WorkerService
         {
             try
             {
-                if (Configuration.ConfigurationProvider.TrySelectValue("Bugsnag.APIKey", null, out string? apiKey))
+                if (Configuration.ConfigurationProvider.TrySelectValue("Bugsnag.APIKey", null, out string apiKey))
                 {
                     LogManager.ConfigureBugsnag(apiKey);
                 }
